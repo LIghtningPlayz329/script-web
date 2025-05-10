@@ -1,180 +1,170 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { Diamond, Server, Gem, X, Rocket, Info } from 'lucide-react';
+import { ChevronUp } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 // Premium product card component
 const PremiumProductCard = ({ product, onBuy }) => {
-  const isMultiOption = product.options && product.options.length > 0;
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className={`rounded-xl overflow-hidden ${product.isSpecial 
-        ? `bg-gradient-to-r ${product.bgColor} shadow-lg`
-        : 'bg-[#0d1b33] shadow-md border border-[#1e3a5e]/40'}`}
-    >
+    <div className="rounded-xl overflow-hidden bg-[#0e1b35] border border-[#1e3a5e]/40">
       <div className="p-5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className={`p-3 rounded-lg ${product.isGradient ? product.bgColor : product.bgColor}`}>
+        <div className="flex items-start gap-4">
+          {/* Icon and product info */}
+          <div className="flex items-start gap-4">
+            <div className={`p-3 rounded-lg ${product.bgColor}`}>
               {product.icon}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                {product.isSpecial && <span className="text-yellow-300">🔥</span>}
-                <h3 className={`font-medium text-lg ${product.textColor || 'text-white'} transition-colors`}>
+                <h3 className="font-medium text-lg text-white">
                   {product.name}
                 </h3>
                 {product.popular && (
                   <Badge className="ml-2 bg-blue-600 text-white">Popular</Badge>
                 )}
               </div>
-              <p className={`text-sm ${product.descriptionColor || 'text-gray-300'}`}>{product.description}</p>
+              <p className="text-sm text-gray-300">{product.description}</p>
             </div>
           </div>
           
-          {isMultiOption ? (
-            <div className="text-right">
-              <div className="flex space-x-6 items-center">
-                {product.options.map((option, idx) => (
-                  <div key={idx} className="flex flex-col items-end">
-                    <span className="text-sm text-gray-300">{option.duration}</span>
-                    <span className="font-bold text-xl text-white">{option.price}</span>
-                    <Button 
-                      variant="secondary" 
-                      size="sm" 
-                      onClick={() => onBuy(product.link)}
-                      className="mt-2 bg-blue-600 hover:bg-blue-700 text-white"
-                    >
-                      Buy Now
-                    </Button>
+          {/* Pricing options */}
+          <div className="ml-auto flex gap-6">
+            {product.options ? (
+              product.options.map((option, idx) => (
+                <div key={idx} className="flex flex-col items-center">
+                  <span className="text-sm text-gray-400">{option.duration}</span>
+                  <span className="font-bold text-xl text-white">{option.price}</span>
+                  <Button 
+                    variant="secondary" 
+                    size="sm" 
+                    onClick={() => onBuy(product.link)}
+                    className="mt-2 bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Buy Now
+                  </Button>
+                </div>
+              ))
+            ) : (
+              <div className="flex flex-col items-center">
+                {product.specialPrice ? (
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-xl text-white">{product.price}</span>
+                    <span className="text-sm text-white bg-blue-600 px-2 py-0.5 rounded-md">
+                      {product.specialPrice}
+                    </span>
                   </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="text-right">
-              <div className="flex flex-col items-end">
-                <span className="font-bold text-xl text-white">{product.price}</span>
+                ) : (
+                  <span className="font-bold text-xl text-white">{product.price}</span>
+                )}
                 <Button 
-                  variant={product.isSpecial ? "default" : "secondary"} 
+                  variant="secondary" 
                   size="sm" 
                   onClick={() => onBuy(product.link)}
-                  className={product.isSpecial ? "mt-2 bg-white text-[#f97316] hover:bg-gray-100" : "mt-2 bg-blue-600 hover:bg-blue-700 text-white"}
+                  className={`mt-2 ${product.isSpecial 
+                    ? "bg-white text-[#f97316] hover:bg-gray-100"
+                    : "bg-blue-600 hover:bg-blue-700 text-white"}`}
                 >
                   Buy Now
                 </Button>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
+        
+        {/* Collapsible details section */}
+        <Collapsible
+          open={isDetailsOpen}
+          onOpenChange={setIsDetailsOpen}
+          className="mt-4 border-t border-[#1e3a5e]/40 pt-2"
+        >
+          <CollapsibleTrigger className="flex items-center gap-2 text-blue-400 hover:text-blue-300">
+            <ChevronUp className={`h-4 w-4 transition-transform ${!isDetailsOpen ? 'rotate-180' : ''}`} />
+            {isDetailsOpen ? 'Hide Details' : 'Show Details'}
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pt-4">
+            <ul className="space-y-2 pl-2">
+              <li className="flex items-start gap-2">
+                <div className="min-w-2 h-2 rounded-full bg-blue-400 mt-2"></div>
+                <span className="text-gray-300">Includes all supported game scripts</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="min-w-2 h-2 rounded-full bg-blue-400 mt-2"></div>
+                <span className="text-gray-300">Access to discontinued scripts</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="min-w-2 h-2 rounded-full bg-blue-400 mt-2"></div>
+                <span className="text-gray-300">Priority Support</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="min-w-2 h-2 rounded-full bg-blue-400 mt-2"></div>
+                <span className="text-gray-300">Premium Only Features</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="min-w-2 h-2 rounded-full bg-blue-400 mt-2"></div>
+                <span className="text-gray-300">Frequent feature updates</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="min-w-2 h-2 rounded-full bg-blue-400 mt-2"></div>
+                <span className="text-gray-300">Access to exclusive betas and test builds</span>
+              </li>
+            </ul>
+          </CollapsibleContent>
+        </Collapsible>
       </div>
-    </motion.div>
-  );
-};
-
-// Feedback reminder component
-const FeedbackReminder = ({ onClose }) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 50 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 50 }}
-      className="fixed bottom-5 right-5 max-w-sm bg-gradient-to-r from-blue-500/80 to-indigo-500/80 rounded-lg shadow-lg p-4 z-50 backdrop-blur-md border border-blue-400/50"
-    >
-      <button 
-        onClick={onClose}
-        className="absolute top-2 right-2 text-white/80 hover:text-white"
-      >
-        <X size={18} />
-      </button>
-      <h3 className="text-xl font-semibold text-white mb-2">How are you enjoying Koronis?</h3>
-      <p className="text-white/90 mb-4">We'd love to hear your feedback after using our products!</p>
-      <div className="flex justify-between">
-        <Button variant="ghost" className="text-white bg-white/10 hover:bg-white/20">
-          Give Feedback
-        </Button>
-        <Button variant="default" className="bg-white text-blue-600 hover:bg-blue-50">
-          Rate Us
-        </Button>
-      </div>
-    </motion.div>
+    </div>
   );
 };
 
 const Premium = () => {
   const { toast } = useToast();
-  const [showFeedbackReminder, setShowFeedbackReminder] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
   
-  useEffect(() => {
-    // Check localStorage for feedback reminder
-    const lastVisit = localStorage.getItem('premium_last_visit');
-    const now = new Date().getTime();
-    
-    if (lastVisit) {
-      const daysSinceLastVisit = (now - parseInt(lastVisit)) / (1000 * 60 * 60 * 24);
-      if (daysSinceLastVisit >= 7) {
-        setShowFeedbackReminder(true);
-      }
-    }
-    
-    // Update last visit timestamp
-    localStorage.setItem('premium_last_visit', now.toString());
-  }, []);
-
   const premiumProducts = [
+    {
+      name: "Koronis Hub Premium",
+      description: "Access to all premium features",
+      options: [
+        { duration: "1 Day", price: "$1.00" },
+        { duration: "Lifetime", price: "$10.00" },
+        { duration: "Lifetime", price: "" },
+      ],
+      icon: <div className="w-6 h-6 text-blue-400">◆</div>,
+      bgColor: "bg-blue-500/20",
+      link: "https://arcstore.mysellauth.com/product/koronishub",
+      type: "script",
+    },
     {
       name: "Hot Deal",
       description: "20,000,000 Lumber Bucks",
       price: "$0.99",
-      icon: <Rocket className="w-8 h-8 text-yellow-300" />,
+      icon: <div className="w-6 h-6 text-yellow-300">🚀</div>,
       bgColor: "from-amber-500/80 to-orange-500/80",
       isGradient: true,
       isSpecial: true,
       type: "offer",
-      borderColor: "border-yellow-400/50",
-      textColor: "text-white",
-      descriptionColor: "text-white",
-      buttonBg: "bg-white text-orange-500 hover:bg-yellow-100",
       link: "https://arcstore.mysellauth.com/product/lumberbucks",
     },
     {
       name: "Ronin External",
       description: "External cheat solution with premium features",
       price: "$8.99",
-      icon: <Gem className="w-6 h-6 text-purple-300/90" />,
+      icon: <div className="w-6 h-6 text-purple-300">💎</div>,
       bgColor: "bg-purple-500/20",
       link: "https://arcstore.mysellauth.com/product/ronin-external",
       type: "external",
       popular: true,
     },
     {
-      name: "Koronis Hub Premium",
-      description: "Access to all premium features",
-      options: [
-        { duration: "1 Day", price: "$1.00" },
-        { duration: "Lifetime", price: "$10.00" }
-      ],
-      icon: <Diamond className="w-6 h-6 text-blue-300/90" />,
-      bgColor: "bg-blue-500/20",
-      link: "https://arcstore.mysellauth.com/product/koronishub",
-      type: "script",
-    },
-    {
       name: "Lumber Tycoon 2 Private Server",
       description: "Play Lumber Tycoon 2 on a private server with friends",
       price: "$0.99",
-      icon: <Server className="w-6 h-6 text-green-300/90" />,
+      icon: <div className="w-6 h-6 text-green-300">🖥️</div>,
       bgColor: "bg-green-500/20",
       link: "https://arcstore.mysellauth.com/product/lumber-tycoon-2",
       type: "private",
@@ -183,7 +173,7 @@ const Premium = () => {
       name: "Fisch Private Server",
       description: "Exclusive private server access for Fisch",
       price: "$0.99",
-      icon: <Server className="w-6 h-6 text-amber-300/90" />,
+      icon: <div className="w-6 h-6 text-amber-300">🖥️</div>,
       bgColor: "bg-amber-500/20",
       link: "https://arcstore.mysellauth.com/product/fisch",
       type: "private",
@@ -199,133 +189,79 @@ const Premium = () => {
     window.open(link, '_blank');
   };
 
-  const handleFeedbackClose = () => {
-    setShowFeedbackReminder(false);
-    localStorage.setItem('feedback_dismissed', 'true');
-  };
-
   // Filter products based on active filter
   const filteredProducts = activeTab === 'all' 
     ? premiumProducts 
     : premiumProducts.filter(product => product.type === activeTab);
 
   return (
-    <div className="relative pt-16 px-4 max-w-5xl mx-auto min-h-screen bg-[#0a1525]/90">
-      {showFeedbackReminder && <FeedbackReminder onClose={handleFeedbackClose} />}
-      
+    <div className="relative pt-16 px-4 min-h-screen bg-[#0d1522]">
       <div className="text-center mb-10">
         <motion.h1 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className="text-4xl md:text-5xl font-bold mb-3 text-white"
+          className="text-4xl md:text-5xl font-bold mb-2 text-white"
         >
-          Premium Features
+          Purchase
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.7 }}
-          className="text-lg text-gray-300 max-w-2xl mx-auto mb-6"
+          className="text-lg text-gray-300 max-w-2xl mx-auto mb-12"
         >
           Enhance your gaming experience with our premium offerings.
         </motion.p>
         
-        <Tabs defaultValue="all" className="w-full max-w-3xl mx-auto">
-          <TabsList className="grid grid-cols-4 bg-[#1e3a5e]/40 p-1 rounded-xl mb-8">
-            <TabsTrigger 
-              value="all" 
+        {/* Tab navigation */}
+        <div className="flex justify-center mb-8">
+          <div className="flex bg-[#1e3a5e]/40 p-1 rounded-full">
+            <button
               onClick={() => setActiveTab('all')}
-              className={activeTab === 'all' ? 'bg-blue-600 text-white data-[state=active]:bg-blue-600' : 'text-gray-300 data-[state=active]:bg-[#1e3a5e]/70 data-[state=active]:text-white'}
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
+                activeTab === 'all' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:text-white'
+              }`}
             >
               All
-            </TabsTrigger>
-            <TabsTrigger 
-              value="script" 
+            </button>
+            <button
               onClick={() => setActiveTab('script')}
-              className={activeTab === 'script' ? 'bg-blue-600 text-white data-[state=active]:bg-blue-600' : 'text-gray-300 data-[state=active]:bg-[#1e3a5e]/70 data-[state=active]:text-white'}
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
+                activeTab === 'script' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:text-white'
+              }`}
             >
               Script
-            </TabsTrigger>
-            <TabsTrigger 
-              value="external" 
+            </button>
+            <button
               onClick={() => setActiveTab('external')}
-              className={activeTab === 'external' ? 'bg-blue-600 text-white data-[state=active]:bg-blue-600' : 'text-gray-300 data-[state=active]:bg-[#1e3a5e]/70 data-[state=active]:text-white'}
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
+                activeTab === 'external' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:text-white'
+              }`}
             >
               External
-            </TabsTrigger>
-            <TabsTrigger 
-              value="private" 
+            </button>
+            <button
               onClick={() => setActiveTab('private')}
-              className={activeTab === 'private' ? 'bg-blue-600 text-white data-[state=active]:bg-blue-600' : 'text-gray-300 data-[state=active]:bg-[#1e3a5e]/70 data-[state=active]:text-white'}
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
+                activeTab === 'private' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:text-white'
+              }`}
             >
               Private
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value={activeTab} className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-            <div className="max-w-4xl mx-auto space-y-5">
-              {filteredProducts.map((product, index) => (
-                <PremiumProductCard 
-                  key={index} 
-                  product={product} 
-                  onBuy={handleProductClick} 
-                />
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
+            </button>
+          </div>
+        </div>
         
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.7 }}
-          className="mt-12 p-5 rounded-xl bg-[#0d1b33] border border-[#1e3a5e]/40 max-w-4xl mx-auto"
-        >
-          <div className="flex items-center gap-2 mb-3">
-            <Info size={16} className="text-blue-400" />
-            <h3 className="text-white font-medium">Premium Benefits</h3>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
-                <p className="text-sm text-gray-300">Lifetime access to premium features</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
-                <p className="text-sm text-gray-300">Higher script execution priority</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
-                <p className="text-sm text-gray-300">Exclusive games and features</p>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
-                <p className="text-sm text-gray-300">Priority customer support</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
-                <p className="text-sm text-gray-300">Early access to new releases</p>
-              </div>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="flex items-center gap-2 cursor-help">
-                      <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
-                      <p className="text-sm text-gray-300 underline decoration-dotted">24/7 server uptime</p>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent className="bg-[#0d1b33] text-white border border-[#1e3a5e]/40">
-                    <p>Our servers are monitored 24/7 to ensure maximum uptime</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-          </div>
-        </motion.div>
+        {/* Product cards */}
+        <div className="max-w-4xl mx-auto space-y-5">
+          {filteredProducts.map((product, index) => (
+            <PremiumProductCard 
+              key={index} 
+              product={product} 
+              onBuy={handleProductClick} 
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
