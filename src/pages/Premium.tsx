@@ -1,12 +1,142 @@
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useToast } from "@/hooks/use-toast";
-import { Diamond, Server, Gem, X, CircleDollarSign, Rocket } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Diamond, Server, Gem, X, Rocket } from 'lucide-react';
+
+// Premium product card component
+const PremiumProductCard = ({ product, onBuy }) => {
+  const isMultiOption = product.options && product.options.length > 0;
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className={`rounded-xl overflow-hidden ${product.isSpecial 
+        ? `bg-gradient-to-r ${product.bgColor} shadow-lg`
+        : 'bg-[#0d1b33] shadow-md border border-[#1e3a5e]/40'}`}
+    >
+      <div className="p-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className={`p-3 rounded-lg ${product.isGradient ? product.bgColor : product.bgColor}`}>
+              {product.icon}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                {product.isSpecial && <span className="text-yellow-300">🔥</span>}
+                <h3 className={`font-medium text-lg ${product.textColor || 'text-white'} transition-colors`}>
+                  {product.name}
+                </h3>
+              </div>
+              <p className={`text-sm ${product.descriptionColor || 'text-gray-300'}`}>{product.description}</p>
+            </div>
+          </div>
+          
+          {isMultiOption ? (
+            <div className="text-right">
+              <div className="flex space-x-6 items-center">
+                {product.options.map((option, idx) => (
+                  <div key={idx} className="flex flex-col items-end">
+                    <span className="text-sm text-gray-300">{option.duration}</span>
+                    <span className="font-bold text-xl text-white">{option.price}</span>
+                    <Button 
+                      variant="secondary" 
+                      size="sm" 
+                      onClick={() => onBuy(product.link)}
+                      className="mt-2 bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      Buy Now
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="text-right">
+              <div className="flex flex-col items-end">
+                <span className="font-bold text-xl text-white">{product.price}</span>
+                <Button 
+                  variant={product.isSpecial ? "default" : "secondary"} 
+                  size="sm" 
+                  onClick={() => onBuy(product.link)}
+                  className={product.isSpecial ? "mt-2 bg-white text-[#f97316] hover:bg-gray-100" : "mt-2 bg-blue-600 hover:bg-blue-700 text-white"}
+                >
+                  Buy Now
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+// Filter tabs component
+const FilterTabs = ({ activeFilter, setActiveFilter }) => {
+  const filters = [
+    { id: 'all', label: 'All' },
+    { id: 'script', label: 'Script' },
+    { id: 'external', label: 'External' },
+    { id: 'private', label: 'Private' }
+  ];
+  
+  return (
+    <div className="flex justify-center gap-2 mb-8">
+      {filters.map((filter) => (
+        <Button
+          key={filter.id}
+          variant={activeFilter === filter.id ? "default" : "secondary"}
+          onClick={() => setActiveFilter(filter.id)}
+          className={activeFilter === filter.id 
+            ? "bg-blue-600 hover:bg-blue-700 text-white" 
+            : "bg-[#1e3a5e]/40 hover:bg-[#1e3a5e]/60 text-gray-300"}
+        >
+          {filter.label}
+        </Button>
+      ))}
+    </div>
+  );
+};
+
+// Feedback reminder component
+const FeedbackReminder = ({ onClose }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 50 }}
+      className="fixed bottom-5 right-5 max-w-sm bg-gradient-to-r from-blue-500/80 to-indigo-500/80 rounded-lg shadow-lg p-4 z-50 backdrop-blur-md border border-blue-400/50"
+    >
+      <button 
+        onClick={onClose}
+        className="absolute top-2 right-2 text-white/80 hover:text-white"
+      >
+        <X size={18} />
+      </button>
+      <h3 className="text-xl font-semibold text-white mb-2">How are you enjoying Koronis?</h3>
+      <p className="text-white/90 mb-4">We'd love to hear your feedback after using our products!</p>
+      <div className="flex justify-between">
+        <Button variant="ghost" className="text-white bg-white/10 hover:bg-white/20">
+          Give Feedback
+        </Button>
+        <Button variant="default" className="bg-white text-blue-600 hover:bg-blue-50">
+          Rate Us
+        </Button>
+      </div>
+    </motion.div>
+  );
+};
 
 const Premium = () => {
   const { toast } = useToast();
   const [showFeedbackReminder, setShowFeedbackReminder] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('all');
   
   useEffect(() => {
     // Check localStorage for feedback reminder
@@ -32,12 +162,22 @@ const Premium = () => {
       icon: <Rocket className="w-8 h-8 text-yellow-300" />,
       bgColor: "from-amber-500/80 to-orange-500/80",
       isGradient: true,
+      isSpecial: true,
+      type: "offer",
       borderColor: "border-yellow-400/50",
       textColor: "text-white",
-      descriptionColor: "text-white/90", // Added specific color for description
+      descriptionColor: "text-white", // Made sure this is white
       buttonBg: "bg-white text-orange-500 hover:bg-yellow-100",
       link: "https://arcstore.mysellauth.com/product/lumberbucks",
-      isSpecial: true
+    },
+    {
+      name: "Ronin External",
+      description: "External cheat solution with premium features",
+      price: "$8.99",
+      icon: <Gem className="w-6 h-6 text-purple-300/90" />,
+      bgColor: "bg-purple-500/20",
+      link: "https://arcstore.mysellauth.com/product/ronin-external",
+      type: "external",
     },
     {
       name: "Koronis Hub Premium",
@@ -48,15 +188,8 @@ const Premium = () => {
       ],
       icon: <Diamond className="w-6 h-6 text-blue-300/90" />,
       bgColor: "bg-blue-500/20",
-      link: "https://arcstore.mysellauth.com/product/koronishub"
-    },
-    {
-      name: "Ronin External",
-      description: "External cheat solution with premium features",
-      price: "$8.99",
-      icon: <Gem className="w-6 h-6 text-purple-300/90" />,
-      bgColor: "bg-purple-500/20",
-      link: "https://arcstore.mysellauth.com/product/ronin-external"
+      link: "https://arcstore.mysellauth.com/product/koronishub",
+      type: "script",
     },
     {
       name: "Lumber Tycoon 2 Private Server",
@@ -64,7 +197,8 @@ const Premium = () => {
       price: "$0.99",
       icon: <Server className="w-6 h-6 text-green-300/90" />,
       bgColor: "bg-green-500/20",
-      link: "https://arcstore.mysellauth.com/product/lumber-tycoon-2"
+      link: "https://arcstore.mysellauth.com/product/lumber-tycoon-2",
+      type: "private",
     },
     {
       name: "Fisch Private Server",
@@ -72,7 +206,8 @@ const Premium = () => {
       price: "$0.99",
       icon: <Server className="w-6 h-6 text-amber-300/90" />,
       bgColor: "bg-amber-500/20",
-      link: "https://arcstore.mysellauth.com/product/fisch"
+      link: "https://arcstore.mysellauth.com/product/fisch",
+      type: "private",
     }
   ];
 
@@ -90,44 +225,23 @@ const Premium = () => {
     localStorage.setItem('feedback_dismissed', 'true');
   };
 
+  // Filter products based on active filter
+  const filteredProducts = activeFilter === 'all' 
+    ? premiumProducts 
+    : premiumProducts.filter(product => product.type === activeFilter);
+
   return (
-    <div className="relative pt-24 px-4 max-w-4xl mx-auto min-h-screen">      
-      <AnimatePresence>
-        {showFeedbackReminder && (
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            className="fixed bottom-5 right-5 max-w-sm bg-gradient-to-r from-blue-500/80 to-indigo-500/80 rounded-lg shadow-lg p-4 z-50 backdrop-blur-md border border-blue-400/50"
-          >
-            <button 
-              onClick={handleFeedbackClose}
-              className="absolute top-2 right-2 text-white/80 hover:text-white"
-            >
-              <X size={18} />
-            </button>
-            <h3 className="text-xl font-semibold text-white mb-2">How are you enjoying Koronis?</h3>
-            <p className="text-white/90 mb-4">We'd love to hear your feedback after using our products!</p>
-            <div className="flex justify-between">
-              <button className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-md">
-                Give Feedback
-              </button>
-              <button className="px-4 py-2 bg-white text-blue-600 rounded-md hover:bg-blue-50">
-                Rate Us
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+    <div className="relative pt-24 px-4 max-w-5xl mx-auto min-h-screen">
+      {showFeedbackReminder && <FeedbackReminder onClose={handleFeedbackClose} />}
       
       <div className="text-center mb-12">
         <motion.h1 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className="text-4xl md:text-5xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-200"
+          className="text-4xl md:text-5xl font-bold mb-6 text-white"
         >
-          Premium Content
+          Purchase
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -140,87 +254,30 @@ const Premium = () => {
       </div>
 
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
         transition={{ delay: 0.4, duration: 0.7 }}
-        className="max-w-3xl mx-auto grid grid-cols-1 gap-6"
       >
-        <div className="mb-6 flex items-center gap-4">
-          <div className="p-3 rounded-lg bg-background/20">
-            <Diamond className="w-6 h-6 text-blue-300/90" />
-          </div>
-          <h2 className="text-2xl font-bold text-white">Premium Options</h2>
-        </div>
+        <FilterTabs activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
         
-        {premiumProducts.map((product, index) => (
-          <motion.div 
-            key={index}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 + (index * 0.1), duration: 0.5 }}
-            className={`p-5 rounded-xl ${product.isGradient 
-              ? `bg-gradient-to-r ${product.bgColor} backdrop-blur-md border ${product.borderColor || 'border-primary/15'}`
-              : `bg-gradient-to-br from-secondary/50 to-secondary/30 backdrop-blur-lg border border-primary/15`
-            } shadow-lg hover:shadow-blue-900/5 transition-all group`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className={`p-3 rounded-lg ${product.isGradient ? product.bgColor : product.bgColor}`}>
-                  {product.icon}
-                </div>
-                <div>
-                  <h3 className={`font-medium text-lg ${product.textColor || 'text-white group-hover:text-blue-200/90'} transition-colors`}>
-                    {product.isSpecial && <span className="text-yellow-300">🔥 </span>}
-                    {product.name}
-                  </h3>
-                  <p className={`text-sm ${product.descriptionColor || 'text-gray-400'}`}>{product.description}</p>
-                </div>
-              </div>
-              
-              {product.options ? (
-                <div className="text-right">
-                  <div className="flex space-x-4 items-center justify-end">
-                    {product.options.map((option, idx) => (
-                      <div key={idx} className="flex flex-col items-end">
-                        <span className="text-sm text-gray-300">{option.duration}</span>
-                        <span className="font-bold text-xl text-white">{option.price}</span>
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          onClick={() => handleProductClick(product.link)}
-                          className="text-sm text-blue-300 bg-blue-500/20 px-3 py-1 rounded-full mt-1"
-                        >
-                          Buy Now
-                        </motion.button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-right">
-                  <div className="flex flex-col items-end">
-                    <span className="font-bold text-xl text-white">{product.price}</span>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      onClick={() => handleProductClick(product.link)}
-                      className={`text-sm px-3 py-1 rounded-full mt-1 block ml-auto ${product.buttonBg || 'text-blue-300 bg-blue-500/20'}`}
-                    >
-                      Buy Now
-                    </motion.button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        ))}
+        <div className="max-w-4xl mx-auto space-y-5">
+          {filteredProducts.map((product, index) => (
+            <PremiumProductCard 
+              key={index} 
+              product={product} 
+              onBuy={handleProductClick} 
+            />
+          ))}
+        </div>
         
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1, duration: 0.7 }}
-          className="mt-8 p-5 rounded-xl bg-gradient-to-br from-secondary/50 to-secondary/30 backdrop-blur-lg border border-primary/15 shadow-lg"
+          className="mt-8 p-5 rounded-xl bg-[#0d1b33] border border-[#1e3a5e]/40 max-w-4xl mx-auto"
         >
-          <p className="text-sm text-gray-400 mb-2">Premium benefits:</p>
-          <ul className="list-disc list-inside space-y-1 text-sm text-gray-400">
+          <p className="text-sm text-gray-300 mb-2">Premium benefits:</p>
+          <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
             <li>Lifetime access to premium features</li>
             <li>Higher script execution priority</li>
             <li>Exclusive games and features</li>
