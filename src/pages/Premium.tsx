@@ -5,7 +5,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Diamond, Server, Gem, X, Rocket } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { Diamond, Server, Gem, X, Rocket, Info } from 'lucide-react';
 
 // Premium product card component
 const PremiumProductCard = ({ product, onBuy }) => {
@@ -32,6 +34,9 @@ const PremiumProductCard = ({ product, onBuy }) => {
                 <h3 className={`font-medium text-lg ${product.textColor || 'text-white'} transition-colors`}>
                   {product.name}
                 </h3>
+                {product.popular && (
+                  <Badge className="ml-2 bg-blue-600 text-white">Popular</Badge>
+                )}
               </div>
               <p className={`text-sm ${product.descriptionColor || 'text-gray-300'}`}>{product.description}</p>
             </div>
@@ -77,33 +82,6 @@ const PremiumProductCard = ({ product, onBuy }) => {
   );
 };
 
-// Filter tabs component
-const FilterTabs = ({ activeFilter, setActiveFilter }) => {
-  const filters = [
-    { id: 'all', label: 'All' },
-    { id: 'script', label: 'Script' },
-    { id: 'external', label: 'External' },
-    { id: 'private', label: 'Private' }
-  ];
-  
-  return (
-    <div className="flex justify-center gap-2 mb-8">
-      {filters.map((filter) => (
-        <Button
-          key={filter.id}
-          variant={activeFilter === filter.id ? "default" : "secondary"}
-          onClick={() => setActiveFilter(filter.id)}
-          className={activeFilter === filter.id 
-            ? "bg-blue-600 hover:bg-blue-700 text-white" 
-            : "bg-[#1e3a5e]/40 hover:bg-[#1e3a5e]/60 text-gray-300"}
-        >
-          {filter.label}
-        </Button>
-      ))}
-    </div>
-  );
-};
-
 // Feedback reminder component
 const FeedbackReminder = ({ onClose }) => {
   return (
@@ -136,7 +114,7 @@ const FeedbackReminder = ({ onClose }) => {
 const Premium = () => {
   const { toast } = useToast();
   const [showFeedbackReminder, setShowFeedbackReminder] = useState(false);
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [activeTab, setActiveTab] = useState('all');
   
   useEffect(() => {
     // Check localStorage for feedback reminder
@@ -166,7 +144,7 @@ const Premium = () => {
       type: "offer",
       borderColor: "border-yellow-400/50",
       textColor: "text-white",
-      descriptionColor: "text-white", // Made sure this is white
+      descriptionColor: "text-white",
       buttonBg: "bg-white text-orange-500 hover:bg-yellow-100",
       link: "https://arcstore.mysellauth.com/product/lumberbucks",
     },
@@ -178,6 +156,7 @@ const Premium = () => {
       bgColor: "bg-purple-500/20",
       link: "https://arcstore.mysellauth.com/product/ronin-external",
       type: "external",
+      popular: true,
     },
     {
       name: "Koronis Hub Premium",
@@ -226,66 +205,128 @@ const Premium = () => {
   };
 
   // Filter products based on active filter
-  const filteredProducts = activeFilter === 'all' 
+  const filteredProducts = activeTab === 'all' 
     ? premiumProducts 
-    : premiumProducts.filter(product => product.type === activeFilter);
+    : premiumProducts.filter(product => product.type === activeTab);
 
   return (
-    <div className="relative pt-24 px-4 max-w-5xl mx-auto min-h-screen">
+    <div className="relative pt-16 px-4 max-w-5xl mx-auto min-h-screen bg-[#0a1525]/90">
       {showFeedbackReminder && <FeedbackReminder onClose={handleFeedbackClose} />}
       
-      <div className="text-center mb-12">
+      <div className="text-center mb-10">
         <motion.h1 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className="text-4xl md:text-5xl font-bold mb-6 text-white"
+          className="text-4xl md:text-5xl font-bold mb-3 text-white"
         >
-          Purchase
+          Premium Features
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.7 }}
-          className="text-lg text-gray-300 max-w-2xl mx-auto"
+          className="text-lg text-gray-300 max-w-2xl mx-auto mb-6"
         >
           Enhance your gaming experience with our premium offerings.
         </motion.p>
-      </div>
-
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.4, duration: 0.7 }}
-      >
-        <FilterTabs activeFilter={activeFilter} setActiveFilter={setActiveFilter} />
         
-        <div className="max-w-4xl mx-auto space-y-5">
-          {filteredProducts.map((product, index) => (
-            <PremiumProductCard 
-              key={index} 
-              product={product} 
-              onBuy={handleProductClick} 
-            />
-          ))}
-        </div>
+        <Tabs defaultValue="all" className="w-full max-w-3xl mx-auto">
+          <TabsList className="grid grid-cols-4 bg-[#1e3a5e]/40 p-1 rounded-xl mb-8">
+            <TabsTrigger 
+              value="all" 
+              onClick={() => setActiveTab('all')}
+              className={activeTab === 'all' ? 'bg-blue-600 text-white data-[state=active]:bg-blue-600' : 'text-gray-300 data-[state=active]:bg-[#1e3a5e]/70 data-[state=active]:text-white'}
+            >
+              All
+            </TabsTrigger>
+            <TabsTrigger 
+              value="script" 
+              onClick={() => setActiveTab('script')}
+              className={activeTab === 'script' ? 'bg-blue-600 text-white data-[state=active]:bg-blue-600' : 'text-gray-300 data-[state=active]:bg-[#1e3a5e]/70 data-[state=active]:text-white'}
+            >
+              Script
+            </TabsTrigger>
+            <TabsTrigger 
+              value="external" 
+              onClick={() => setActiveTab('external')}
+              className={activeTab === 'external' ? 'bg-blue-600 text-white data-[state=active]:bg-blue-600' : 'text-gray-300 data-[state=active]:bg-[#1e3a5e]/70 data-[state=active]:text-white'}
+            >
+              External
+            </TabsTrigger>
+            <TabsTrigger 
+              value="private" 
+              onClick={() => setActiveTab('private')}
+              className={activeTab === 'private' ? 'bg-blue-600 text-white data-[state=active]:bg-blue-600' : 'text-gray-300 data-[state=active]:bg-[#1e3a5e]/70 data-[state=active]:text-white'}
+            >
+              Private
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value={activeTab} className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+            <div className="max-w-4xl mx-auto space-y-5">
+              {filteredProducts.map((product, index) => (
+                <PremiumProductCard 
+                  key={index} 
+                  product={product} 
+                  onBuy={handleProductClick} 
+                />
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
         
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1, duration: 0.7 }}
-          className="mt-8 p-5 rounded-xl bg-[#0d1b33] border border-[#1e3a5e]/40 max-w-4xl mx-auto"
+          transition={{ delay: 0.5, duration: 0.7 }}
+          className="mt-12 p-5 rounded-xl bg-[#0d1b33] border border-[#1e3a5e]/40 max-w-4xl mx-auto"
         >
-          <p className="text-sm text-gray-300 mb-2">Premium benefits:</p>
-          <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
-            <li>Lifetime access to premium features</li>
-            <li>Higher script execution priority</li>
-            <li>Exclusive games and features</li>
-            <li>Priority customer support</li>
-            <li>Early access to new releases</li>
-          </ul>
+          <div className="flex items-center gap-2 mb-3">
+            <Info size={16} className="text-blue-400" />
+            <h3 className="text-white font-medium">Premium Benefits</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                <p className="text-sm text-gray-300">Lifetime access to premium features</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                <p className="text-sm text-gray-300">Higher script execution priority</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                <p className="text-sm text-gray-300">Exclusive games and features</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                <p className="text-sm text-gray-300">Priority customer support</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                <p className="text-sm text-gray-300">Early access to new releases</p>
+              </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-2 cursor-help">
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                      <p className="text-sm text-gray-300 underline decoration-dotted">24/7 server uptime</p>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-[#0d1b33] text-white border border-[#1e3a5e]/40">
+                    <p>Our servers are monitored 24/7 to ensure maximum uptime</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </div>
         </motion.div>
-      </motion.div>
+      </div>
     </div>
   );
 };
