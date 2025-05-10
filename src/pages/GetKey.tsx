@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useToast } from "@/hooks/use-toast";
@@ -10,14 +11,14 @@ const GetKey = () => {
   const keyMethods = [
     {
       name: "Linkvertise",
-      url: "https://ads.luarmor.net/get_key?for=-VCrPMxzUQEDq",
+      url: "https://ads.luarmor.net/get_key?for=Linkvertise-VCrPMxzUQEDq",
       duration: "24 Hours",
       icon: <LinkIcon className="w-5 h-5 text-blue-300/90" />,
       bgColor: "bg-blue-500/20"
     },
     {
       name: "Lootlabs",
-      url: "https://ads.luarmor.net/get_key?for=Free_72H-oCmVwmZqQgsE",
+      url: "https://ads.luarmor.net/get_key?for=Lootlabs-oCmVwmZqQgsE",
       duration: "12 Hours",
       icon: <svg className="w-5 h-5 text-green-300/90" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h2v-4Z"/></svg>,
       bgColor: "bg-green-500/20"
@@ -40,7 +41,8 @@ const GetKey = () => {
       duration: 2000,
     });
     
-    window.open(url, '_blank');
+    // Direct open of link in new tab to ensure proper redirection
+    window.open(url, '_blank', 'noopener,noreferrer');
     setTimeout(() => setIsLoading(false), 1000);
   };
 
